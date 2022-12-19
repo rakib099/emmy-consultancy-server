@@ -1,6 +1,6 @@
 const express = require('express');
 const cors = require('cors');
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 require('dotenv').config();
 
 const app = express();
@@ -19,6 +19,31 @@ const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology:
 async function run() {
     try {
         const serviceCollection = client.db('emmysDB').collection('services');
+        const serviceDetailsCollection = client.db('emmysDB').collection('serviceDetails');
+
+        // serviceCard api
+        app.get('/services', async (req, res) => {
+            const query = {}
+            const cursor = serviceCollection.find(query);
+            const page = req.query.page;
+
+            let services;
+            if (!!page && page === "home") {
+                services = await cursor.limit(3).toArray();
+            }
+            else {
+                services = await cursor.toArray();
+            }
+            res.send(services);
+        });
+
+        // service details api
+        app.get('/serviceDetails/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = {_id: id};
+            const serviceDetail = await serviceDetailsCollection.findOne(query);
+            res.send(serviceDetail);
+        });
     }
     finally {
 
@@ -27,9 +52,6 @@ async function run() {
 
 run().catch(console.dir);
 
-// app.get('/services', (req, res) => {
-//     res.send(services);
-// });
 
 app.get('/', (req, res) => {
     res.send("Emmy's Consultancy Server Running");
