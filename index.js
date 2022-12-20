@@ -20,6 +20,7 @@ async function run() {
     try {
         const serviceCollection = client.db('emmysDB').collection('services');
         const serviceDetailsCollection = client.db('emmysDB').collection('serviceDetails');
+        const reviewCollection = client.db('emmysDB').collection('reviews');
 
         // serviceCard api
         app.get('/services', async (req, res) => {
@@ -43,6 +44,14 @@ async function run() {
             const query = {_id: id};
             const serviceDetail = await serviceDetailsCollection.findOne(query);
             res.send(serviceDetail);
+        });
+
+        // reviews api
+        app.post('/reviews', async (req, res) => {
+            const review = req.body;
+            const result = await reviewCollection.insertOne(review);
+            console.log(result);
+            res.send(result);
         });
     }
     finally {
