@@ -38,10 +38,17 @@ async function run() {
             res.send(services);
         });
 
+        app.post('/services', async (req, res) => {
+            const service = req.body;
+            const result = await serviceCollection.insertOne(service);
+            console.log(result);
+            res.send(result);
+        });
+
         // service details api
         app.get('/serviceDetails/:id', async (req, res) => {
             const id = req.params.id;
-            const query = {_id: id};
+            const query = { _id: id };
             const serviceDetail = await serviceDetailsCollection.findOne(query);
             res.send(serviceDetail);
         });
@@ -49,10 +56,16 @@ async function run() {
         // reviews api
         app.get('/reviews', async (req, res) => {
             const email = req.query.email;
+            const serviceId = req.query.serviceId;
             let query = {};
             if (req.query?.email) {
                 query = {
                     userEmail: email
+                }
+            }
+            else if (req.query?.serviceId) {
+                query = {
+                    serviceId: serviceId
                 }
             }
             const cursor = reviewCollection.find(query);
